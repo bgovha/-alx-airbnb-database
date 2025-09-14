@@ -33,3 +33,31 @@ CREATE INDEX idx_properties_host_status ON properties(host_id, is_active);
 CREATE INDEX idx_reviews_property_date ON reviews(property_id, created_at);
 
 
+-- Analyze query performance before indexes
+EXPLAIN ANALYZE
+SELECT 
+    u.user_id,
+    u.name,
+    COUNT(b.booking_id) as total_bookings
+FROM users u
+JOIN bookings b ON u.user_id = b.user_id
+WHERE u.email = 'user@example.com'
+AND b.check_in BETWEEN '2024-01-01' AND '2024-12-31'
+GROUP BY u.user_id, u.name;
+
+-- Create the indexes first
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX idx_bookings_check_in ON bookings(check_in);
+
+-- Then analyze the same query
+EXPLAIN ANALYZE
+SELECT 
+    u.user_id,
+    u.name,
+    COUNT(b.booking_id) as total_bookings
+FROM users u
+JOIN bookings b ON u.user_id = b.user_id
+WHERE u.email = 'user@example.com'
+AND b.check_in BETWEEN '2024-01-01' AND '2024-12-31'
+GROUP BY u.user_id, u.name;
